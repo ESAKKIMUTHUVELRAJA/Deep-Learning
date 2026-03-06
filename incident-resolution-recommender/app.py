@@ -71,8 +71,8 @@ def recommend_resolution(query, top_k=3):
 
     for idx in top_indices:
         results.append({
-            "Incident": resolution_data.iloc[idx]["incident_description"],
-            "Resolution": resolution_data.iloc[idx]["resolution"],
+            "Incident": X_train.iloc[idx]["incident_description"],
+            "Resolution": y_train.iloc[idx]["resolution"],
             "Similarity": float(similarity[idx])
         })
 
