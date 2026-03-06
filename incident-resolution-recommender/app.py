@@ -71,10 +71,11 @@ def recommend_resolution(query, top_k=3):
 
     for idx in top_indices:
         results.append({
-            "Incident": tokenizer.sequences_to_texts([X_train[idx]])[0], # Convert sequence back to text
-            "Resolution": y_train.iloc[idx],
-            "Similarity": similarity[idx]
+            "Incident": resolution_data.iloc[idx]["incident_description"],
+            "Resolution": resolution_data.iloc[idx]["resolution"],
+            "Similarity": float(similarity[idx])
         })
+
 
     return pd.DataFrame(results)
 
