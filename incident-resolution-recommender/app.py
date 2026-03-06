@@ -30,6 +30,7 @@ embeddings_path = os.path.join(BASE_DIR, "incident_embeddings.pickle")
 maxlen_path = os.path.join(BASE_DIR, "max_len.pickle")
 resolution_path = os.path.join(BASE_DIR, "resolution_data.pickle")
 training_path = os.path.join(BASE_DIR, "training_data.pickle")
+tokenizer_path = os.path.join(BASE_DIR, "tokenizer.pickle")
 
 with open(embeddings_path, "rb") as f:
     incident_embeddings = pickle.load(f)
@@ -42,6 +43,9 @@ with open(resolution_path, "rb") as f:
 
 with open(training_path, "rb") as f:
     X_train = pickle.load(f)
+
+with open(tokenizer_path, "rb") as f:
+    tokenizer = pickle.load(f)
 
 
 st.title("Incident Resolution Recommender System")
