@@ -10,7 +10,7 @@ from tensorflow.keras.models import load_model
 
 
 # ==============================
-# 1. Load Files
+# 1. Paths
 # ==============================
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -31,7 +31,7 @@ encoder_model = load_model(model_path, compile=False)
 
 
 # ==============================
-# 3. Load Pickle Files
+# 3. Load Data
 # ==============================
 
 with open(embeddings_path, "rb") as f:
@@ -72,9 +72,18 @@ def recommend_resolution(query, top_k=3):
 
         if idx < len(X_train):
 
+            # Convert sequence back to text
+            incident_text = tokenizer.sequences_to_texts([X_train[idx]])[0]
+
+            # Resolution handling
+            if isinstance(y_train, pd.DataFrame):
+                resolution_text = y_train.iloc[idx]["resolution"]
+            else:
+                resolution_text = y_train[idx]
+
             results.append({
-                "Incident": X_train.iloc[idx]["incident_description"],
-                "Resolution": y_train.iloc[idx]["resolution"],
+                "Incident": incident_text,
+                "Resolution": resolution_text,
                 "Similarity Score": float(similarity[idx])
             })
 
@@ -87,7 +96,7 @@ def recommend_resolution(query, top_k=3):
 
 st.title("🛠 Incident Resolution Recommender System")
 
-st.write("Enter an incident description and get recommended resolution steps.")
+st.write("Enter an incident description to get recommended resolutions.")
 
 query = st.text_input("Incident Description")
 
@@ -109,11 +118,13 @@ if submit:
 
             results = recommend_resolution(query)
 
-        st.success("Top Recommended Resolutions")
-
         if len(results) == 0:
+
             st.error("No recommendations found.")
+
         else:
+
+            st.success("Top Recommended Resolutions")
 
             for i, row in results.iterrows():
 
