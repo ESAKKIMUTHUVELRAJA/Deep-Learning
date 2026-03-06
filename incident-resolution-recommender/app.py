@@ -9,9 +9,9 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import load_model
 
 
-# ==============================
-# 1. Paths
-# ==============================
+# =============================
+# Load Files
+# =============================
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -23,17 +23,10 @@ training_path = os.path.join(BASE_DIR, "training_data.pickle")
 tokenizer_path = os.path.join(BASE_DIR, "tokenizer.pickle")
 
 
-# ==============================
-# 2. Load Model
-# ==============================
-
+# Load model
 encoder_model = load_model(model_path, compile=False)
 
-
-# ==============================
-# 3. Load Data
-# ==============================
-
+# Load data
 with open(embeddings_path, "rb") as f:
     incident_embeddings = pickle.load(f)
 
@@ -50,19 +43,36 @@ with open(tokenizer_path, "rb") as f:
     tokenizer = pickle.load(f)
 
 
-# ==============================
-# 4. Recommendation Function
-# ==============================
+# =============================
+# Streamlit UI
+# =============================
+
+st.title("🛠 Incident Resolution Recommender System")
+
+st.write("Enter an incident description to get recommended resolutions.")
+
+query = st.text_area("Incident Description")
+
+
+# =============================
+# Recommendation Function
+# =============================
 
 def recommend_resolution(query, top_k=3):
 
     seq = tokenizer.texts_to_sequences([query])
-
     padded = pad_sequences(seq, maxlen=max_len, padding="post")
 
     query_embedding = encoder_model.predict(padded)
 
-    similarity = cosine_similarity(query_embedding, incident_embeddings)[0]
+    # Normalize embeddings
+    query_embedding = query_embedding / np.linalg.norm(query_embedding)
+
+    incident_embeddings_norm = incident_embeddings / np.linalg.norm(
+        incident_embeddings, axis=1, keepdims=True
+    )
+
+    similarity = np.dot(incident_embeddings_norm, query_embedding.T).flatten()
 
     top_indices = similarity.argsort()[-top_k:][::-1]
 
@@ -72,14 +82,10 @@ def recommend_resolution(query, top_k=3):
 
         if idx < len(X_train):
 
-            # Convert sequence back to text
             incident_text = tokenizer.sequences_to_texts([X_train[idx]])[0]
+            incident_text = incident_text.replace("<OOV>", "")
 
-            # Resolution handling
-            if isinstance(y_train, pd.DataFrame):
-                resolution_text = y_train.iloc[idx]["resolution"]
-            else:
-                resolution_text = y_train[idx]
+            resolution_text = y_train.iloc[idx]["resolution"]
 
             results.append({
                 "Incident": incident_text,
@@ -90,27 +96,14 @@ def recommend_resolution(query, top_k=3):
     return pd.DataFrame(results)
 
 
-# ==============================
-# 5. Streamlit UI
-# ==============================
+# =============================
+# Button Action
+# =============================
 
-st.title("🛠 Incident Resolution Recommender System")
-
-st.write("Enter an incident description to get recommended resolutions.")
-
-query = st.text_input("Incident Description")
-
-submit = st.button("Get Resolution")
-
-
-# ==============================
-# 6. Run Recommendation
-# ==============================
-
-if submit:
+if st.button("Get Resolution"):
 
     if query.strip() == "":
-        st.warning("Please enter an incident description.")
+        st.warning("Please enter an incident description")
 
     else:
 
@@ -118,24 +111,18 @@ if submit:
 
             results = recommend_resolution(query)
 
-        if len(results) == 0:
+        st.subheader("Top Recommended Resolutions")
 
-            st.error("No recommendations found.")
+        for i, row in results.iterrows():
 
-        else:
+            st.markdown(f"### Recommendation {i+1}")
 
-            st.success("Top Recommended Resolutions")
+            st.markdown("**Similar Incident:**")
+            st.info(row["Incident"])
 
-            for i, row in results.iterrows():
+            st.markdown("**Resolution:**")
+            st.success(row["Resolution"])
 
-                st.markdown(f"### Recommendation {i+1}")
+            st.caption(f"Similarity Score: {round(row['Similarity Score'],3)}")
 
-                st.write("**Similar Incident:**")
-                st.write(row["Incident"])
-
-                st.write("**Resolution:**")
-                st.write(row["Resolution"])
-
-                st.write("**Similarity Score:**", round(row["Similarity Score"], 3))
-
-                st.divider()
+            st.divider()
