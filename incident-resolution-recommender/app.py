@@ -74,6 +74,7 @@ def recommend_resolution(query, top_k=3):
 
             # Convert sequence back to text
             incident_text = tokenizer.sequences_to_texts([X_train[idx]])[0]
+            incident_text = incident_text.replace("<OOV>", "")
 
             # Resolution handling
             if isinstance(y_train, pd.DataFrame):
