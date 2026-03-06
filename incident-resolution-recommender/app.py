@@ -13,8 +13,6 @@ Original file is located at
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns
 import pickle
 from sklearn.metrics.pairwise import cosine_similarity
 from tensorflow.keras.preprocessing.text import Tokenizer
