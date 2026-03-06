@@ -62,14 +62,14 @@ def recommend_resolution(query, top_k=3):
 
     query_embedding = encoder_model.predict(padded)
 
-    #similarity = cosine_similarity(query_embedding, incident_embeddings)[0]
+    similarity = cosine_similarity(query_embedding, incident_embeddings)[0]
 
-    query_embedding = query_embedding / np.linalg.norm(query_embedding)
+    '''query_embedding = query_embedding / np.linalg.norm(query_embedding)
     st.write('Query Embeddings', query_embedding.T)
     incident_embeddings_norm = incident_embeddings / np.linalg.norm(incident_embeddings, axis=1, keepdims=True)
     st.write('Incident_embedding_norm', incident_embeddings_norm)
 
-    similarity = np.dot(incident_embeddings_norm, query_embedding.T).flatten()
+    similarity = np.dot(incident_embeddings_norm, query_embedding.T).flatten()'''
 
     top_indices = similarity.argsort()[-top_k:][::-1]
 
