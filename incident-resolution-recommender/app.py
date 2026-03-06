@@ -18,6 +18,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import load_model
+import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
