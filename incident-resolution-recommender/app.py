@@ -19,7 +19,11 @@ from tensorflow.keras.preprocessing.text import Tokenizer
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.models import load_model
 
-encoder_model = load_model('incident_encoder_model.h5')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+model_path = os.path.join(BASE_DIR, "incident_encoder_model.h5")
+
+encoder_model = load_model(model_path)
 
 with open('tokenizer.pickle', 'rb') as f:
   tokenizer = pickle.load(f)
